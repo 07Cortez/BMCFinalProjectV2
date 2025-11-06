@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:ecommerce_app2/screens/auth_wrapper.dart';
+import 'package:ecommerce_app1/screens/auth_wrapper.dart';
 import 'package:provider/provider.dart';
 import 'package:ecommerce_app2/providers/cart_provider.dart';
 
