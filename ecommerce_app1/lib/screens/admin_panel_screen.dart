@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -10,12 +10,14 @@ class AdminPanelScreen extends StatefulWidget {
 
 class _AdminPanelScreenState extends State<AdminPanelScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _imageUrlController = TextEditingController();
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _imageUrlController = TextEditingController();
 
   bool _isLoading = false;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -48,9 +50,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Organic product uploaded successfully!')),
+        const SnackBar(content: Text('Product uploaded successfully!')),
       );
-
       _formKey.currentState!.reset();
       _nameController.clear();
       _descriptionController.clear();
@@ -58,9 +59,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       _imageUrlController.clear();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload organic product: $e')),
+        SnackBar(content: Text('Failed to upload product: $e')),
       );
-      print(e);
     } finally {
       if (mounted) {
         setState(() {
@@ -74,174 +74,95 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Admin Panel',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Admin - Add Organic Product'),
         backgroundColor: Colors.green[700],
-        iconTheme: const IconThemeData(color: Colors.white),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        foregroundColor: Colors.white,
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/vegetables_bg.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          Center(
-            child: SingleChildScrollView(
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                margin: const EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(15.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 5,
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _imageUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'Organic Image URL',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.url,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an image URL';
+                    }
+                    if (!value.startsWith('http')) {
+                      return 'Please enter a valid URL (e.g., http://...)';
+                    }
+                    return null;
+                  },
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 18.0),
-                      decoration: BoxDecoration(
-                        color: Colors.green[600],
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
-                      ),
-                      child: const Text(
-                        'Admin - Add Organic Product',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(25.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildTextField(
-                              controller: _imageUrlController,
-                              labelText: 'Organic Image URL',
-                              keyboardType: TextInputType.url,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter an image URL';
-                                }
-                                if (!value.startsWith('http')) {
-                                  return 'Please enter a valid URL (e.g., http://...)';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 18),
-                            _buildTextField(
-                              controller: _nameController,
-                              labelText: 'Organic Product Name',
-                              validator: (value) =>
-                              value!.isEmpty ? 'Please enter a name' : null,
-                            ),
-                            const SizedBox(height: 18),
-                            _buildTextField(
-                              controller: _descriptionController,
-                              labelText: 'Organic Description',
-                              maxLines: 4,
-                              validator: (value) =>
-                              value!.isEmpty ? 'Please enter a description' : null,
-                            ),
-                            const SizedBox(height: 18),
-                            _buildTextField(
-                              controller: _priceController,
-                              labelText: 'Organic Price',
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter a price';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Please enter a valid number';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 30),
-                            ElevatedButton(
-                              onPressed: _isLoading ? null : _uploadProduct,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green[500],
-                                padding: const EdgeInsets.symmetric(vertical: 18.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                              ),
-                              child: _isLoading
-                                  ? const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-                                  : const Text(
-                                'Upload Organic Product',
-                                style: TextStyle(fontSize: 19.0, color: Colors.white, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                const SizedBox(height: 16),
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String labelText,
-    TextInputType keyboardType = TextInputType.text,
-    int maxLines = 1,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: labelText,
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-          borderSide: BorderSide(color: Colors.grey),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Organic Product Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) =>
+                  value!.isEmpty ? 'Please enter a name' : null,
+                ),
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Organic Description',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                  validator: (value) =>
+                  value!.isEmpty ? 'Please enter a description' : null,
+                ),
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _priceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Organic Price',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a price';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[700],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  onPressed: _isLoading ? null : _uploadProduct,
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('Upload Organic Product', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          ),
         ),
-        enabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-          borderSide: BorderSide(color: Colors.green[600]!, width: 2.0),
-        ),
-        labelStyle: const TextStyle(color: Colors.grey),
-        floatingLabelBehavior: FloatingLabelBehavior.auto,
-        contentPadding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 12.0),
       ),
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      validator: validator,
     );
   }
 }
