@@ -4,7 +4,7 @@ import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:ecommerce_app1/screens/auth_wrapper.dart';
 import 'package:provider/provider.dart';
-import 'package:ecommerce_app2/providers/cart_provider.dart';
+import 'package:ecommerce_app1/providers/cart_provider.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
