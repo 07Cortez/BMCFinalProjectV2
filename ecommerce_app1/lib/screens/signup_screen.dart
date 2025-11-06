@@ -1,5 +1,5 @@
-import 'package:ecommerce_app1/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:ecommerce_app1/screens/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -12,6 +12,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -56,13 +57,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Account created successfully!'),
+          content: Text('Sign Up Successful!'),
           backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -71,9 +67,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         message = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
         message = 'An account already exists for that email.';
-      } else {
-        message = e.message ?? message;
+      } else if (e.code == 'invalid-email') {
+        message = 'The email address is not valid.';
+      } else if (e.code == 'network-request-failed') {
+        message = 'Please check your internet connection.';
       }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
@@ -81,10 +80,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       );
     } catch (e) {
-      print(e); // For debugging
+      print('Sign up error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
+        const SnackBar(
+          content: Text('An unexpected error occurred during sign up.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -101,12 +100,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Sign Up',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Sign Up'),
         backgroundColor: Colors.green[700],
-        iconTheme: const IconThemeData(color: Colors.white),
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -115,62 +111,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 20),
                 TextFormField(
-                  key: const ValueKey('email'),
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Email',
-                    labelStyle: TextStyle(color: Colors.green[800]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.green[600]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.lightGreen[700]!, width: 2),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.green[400]!),
-                    ),
-                    prefixIcon: Icon(Icons.email, color: Colors.green[700]),
+                    border: OutlineInputBorder(),
                   ),
+                  keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.isEmpty || !value.contains('@')) {
-                      return 'Please enter a valid email address.';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  key: const ValueKey('password'),
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    labelStyle: TextStyle(color: Colors.green[800]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.green[600]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.lightGreen[700]!, width: 2),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.green[400]!),
-                    ),
-                    prefixIcon: Icon(Icons.lock, color: Colors.green[700]),
+                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.green[700],
                       ),
                       onPressed: () {
                         setState(() {
@@ -180,37 +149,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty || value.length < 6) {
-                      return 'Password must be at least 6 characters.';
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  key: const ValueKey('confirm_password'),
                   controller: _confirmPasswordController,
                   obscureText: !_isConfirmPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
-                    labelStyle: TextStyle(color: Colors.green[800]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.green[600]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.lightGreen[700]!, width: 2),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.green[400]!),
-                    ),
-                    prefixIcon: Icon(Icons.lock, color: Colors.green[700]),
+                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.green[700],
                       ),
                       onPressed: () {
                         setState(() {
@@ -221,10 +178,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password.';
+                      return 'Please confirm your password';
                     }
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match.';
+                      return 'Passwords do not match';
                     }
                     return null;
                   },
@@ -233,21 +190,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(50),
-                    backgroundColor: Colors.green[800],
+                    backgroundColor: Colors.green[700],
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
                   ),
                   onPressed: _isLoading ? null : _signUp,
                   child: _isLoading
                       ? const CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   )
-                      : const Text(
-                    'Sign Up',
-                    style: TextStyle(fontSize: 18),
-                  ),
+                      : const Text('Sign Up'),
                 ),
                 const SizedBox(height: 10),
                 TextButton(
@@ -258,13 +209,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     );
                   },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.green[700],
-                  ),
-                  child: const Text(
-                    "Already have an account? Login",
-                    style: TextStyle(decoration: TextDecoration.underline),
-                  ),
+                  child: const Text("Already have an account? Login"),
                 ),
               ],
             ),
