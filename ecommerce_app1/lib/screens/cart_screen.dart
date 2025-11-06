@@ -1,6 +1,6 @@
-import 'package:ecommerce_app1/providers/cart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:ecommerce_app1/providers/cart_provider.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -12,6 +12,8 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Cart'),
+        backgroundColor: Colors.green[700],
+        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
@@ -24,7 +26,8 @@ class CartScreen extends StatelessWidget {
                 final cartItem = cart.items[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    child: Text(cartItem.name[0]),
+                    backgroundColor: Colors.green[700],
+                    child: Text(cartItem.name[0], style: TextStyle(color: Colors.white)),
                   ),
                   title: Text(cartItem.name),
                   subtitle: Text('Qty: ${cartItem.quantity}'),
@@ -32,7 +35,8 @@ class CartScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                          'P${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}'),
+                        'P${(cartItem.price * cartItem.quantity).toStringAsFixed(2)}',
+                      ),
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {
